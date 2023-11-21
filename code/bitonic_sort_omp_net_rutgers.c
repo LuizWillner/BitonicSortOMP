@@ -42,7 +42,7 @@ int main(int argc, char *argv[])  // Arg1: Número de threads; Arg2: Tamanho da 
     numThreads = atoi(argv[1]);
     omp_set_num_threads(numThreads);
 
-    printf("Number of threads: %d\n", numThreads);
+    printf("Número de threads %d\n", numThreads);
 
     // making sure input is okay
     if ( n < numThreads * 2 )
@@ -106,9 +106,9 @@ int main(int argc, char *argv[])  // Arg1: Número de threads; Arg2: Tamanho da 
     
     print_sequence(seq, n, 10, 10);
     
-    printf("Start Time: %f sec\n", startTime);
-    printf("Finish Time: %f sec\n", finishTime);
-    printf("Elapsed time = %f sec.\n", elapsedTime);
+    printf("Começo: %f seg\n", startTime);
+    printf("Fim: %f seg\n", finishTime);
+    printf("Tempo decorrido: %f seg\n", elapsedTime);
 
     free(seq);
 
