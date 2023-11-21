@@ -5,6 +5,7 @@
 #include <time.h>
 #include <math.h>
 #include <omp.h>
+#include <limits.h>
 
 
 #define MAX(A, B) (((A) > (B)) ? (A) : (B))
@@ -14,6 +15,7 @@
 
 
 int is_power_of_two(int num);
+int get_size_extended(int size);
 int* generate_random_array(int size, int mod_factor);
 void print_sequence(int* sequence, int sequence_size, int first_n, int last_n);
 void bitonic_sort_seq(int start, int length, int *seq, int flag);
@@ -27,14 +29,15 @@ int m;
 int main(int argc, char *argv[])  // Arg1: Número de threads; Arg2: Tamanho da sequência
 {
     int i, j;
-    int n;
+    int size, size_ext;
     int flag;
     int *seq;
     int numThreads;
     double startTime, finishTime, elapsedTime;
 
-    n = atoi(argv[2]);
-    seq = generate_random_array(n, n);
+    size = atoi(argv[2]);
+    seq = generate_random_array(size, size);
+    size_ext = get_size_extended(size);
 
     // start
     startTime = omp_get_wtime();
@@ -42,28 +45,25 @@ int main(int argc, char *argv[])  // Arg1: Número de threads; Arg2: Tamanho da 
     numThreads = atoi(argv[1]);
     omp_set_num_threads(numThreads);
 
-    printf("Número de threads %d\n", numThreads);
+    printf("Número de threads: %d\n", numThreads);
+    printf("Vetor inicial:\t");
+    print_sequence(seq, size, 10, 10);
 
     // making sure input is okay
-    if ( n < numThreads * 2 )
+    if ( size_ext < numThreads * 2 )
     {
         printf("Erro: O tamanho do vetor é menor que 2 * o número de processos. Abortando...\n");
         exit(1);
     }
-    if (!is_power_of_two(n))
-    {
-        printf("Erro: o tamanho do vetor não é uma potência de 2. Abortando...\n");
-        exit(1);
-    }
 
     // the size of sub part
-    m = n / numThreads;
+    m = size_ext / numThreads;
 
     // make the sequence bitonic - part 1
     for (i = 2; i <= m; i = 2 * i)
     {
 #pragma omp parallel for shared(i, seq) private(j, flag)
-        for (j = 0; j < n; j += i)
+        for (j = 0; j < size_ext; j += i)
         {
             if ((j / i) % 2 == 0)
                 flag = UP;
@@ -96,16 +96,16 @@ int main(int argc, char *argv[])  // Arg1: Número de threads; Arg2: Tamanho da 
     }
 
     // bitonic sort
-    //bitonic_sort_par(0, n, seq, UP);
-    //bitonic_sort_seq(0, n, seq, UP);
+    //bitonic_sort_par(0, size_ext, seq, UP);
+    //bitonic_sort_seq(0, size_ext, seq, UP);
 
     //end
     finishTime = omp_get_wtime();
     elapsedTime = finishTime - startTime;
 
-    
-    print_sequence(seq, n, 10, 10);
-    
+    printf("Vetor final:\t");
+    print_sequence(seq, size, 10, 10);
+    printf("\n");
     printf("Começo: %f seg\n", startTime);
     printf("Fim: %f seg\n", finishTime);
     printf("Tempo decorrido: %f seg\n", elapsedTime);
@@ -123,16 +123,44 @@ int is_power_of_two(int num)
 }
 
 
+int get_size_extended(int size)
+{
+    int size_extended;
+    if (is_power_of_two(size)){
+        // printf("%d é potência de 2.\n", size);
+        size_extended = size;
+    } else {
+        // printf("%d NÃO é potência de 2.\n", size);
+        double exponent = floor(log2(size)) + 1.0;
+        size_extended = (int) pow(2, exponent);
+        // printf("log2(%d) = %f\n", size, log2(size));
+        // printf("Próxima potência de 2 é %d (2^%f)\n", size_extended, exponent);
+    }
+    return size_extended;
+}
+
+
 int* generate_random_array(int size, int mod_factor) 
 {
-    int *array = (int *) malloc(size * sizeof(int));
-
-    // Seed the random number generator with the current time
+    int *array;
     srand(time(NULL));
+    
+    if (is_power_of_two(size)) {
+        array = (int *) malloc(size * sizeof(int));
+        for (int i = 0; i < size; i++) {
+            array[i] = rand() % mod_factor;
+        }
 
-    // Generate n random integers and store them in the vector
-    for (int i = 0; i < size; i++) {
-        array[i] = rand() % mod_factor;
+    } else {
+        double exponent = floor(log2(size)) + 1.0;
+        int size_extended = (int) pow(2, exponent);
+        array = (int *) malloc(size_extended * sizeof(int));
+        for (int i = 0; i < size; i++) {
+            array[i] = rand() % mod_factor;
+        }
+        for (int i = size; i < size_extended; i++) {
+            array[i] = INT_MAX;
+        }
     }
 
     return array;
