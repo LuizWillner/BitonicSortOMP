@@ -140,18 +140,30 @@ void print_sequence(int* sequence, int sequence_size, int first_n, int last_n)
 {
     printf("[");
 
-    for (int i = 0; i < first_n; i++)
+    if (first_n != 0)
     {
-        printf("%d, ", sequence[i]);
+        for (int i = 0; i < first_n - 1; i++)
+        {
+            printf("%d, ", sequence[i]);
+        }
+        printf("%d", sequence[first_n - 1]);
+    }
+    
+    if (first_n != sequence_size && last_n != sequence_size)
+    {
+        printf(", ... , ");
     }
 
-    printf("... , ");
-
-    for (int i = sequence_size - last_n; i < sequence_size - 1; i++)
+    if (last_n != 0)
     {
-        printf("%d, ", sequence[i]);
+        for (int i = sequence_size - last_n; i < sequence_size - 1; i++)
+        {
+            printf("%d, ", sequence[i]);
+        }
+        printf("%d", sequence[sequence_size-1]);
     }
-    printf("%d]\n", sequence[sequence_size-1]);
+    
+    printf("]\n");
 }
 
 
