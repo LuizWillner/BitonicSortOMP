@@ -13,6 +13,7 @@
 #define DOWN 1
 
 
+int is_power_of_two(int num);
 int* generate_random_array(int size, int mod_factor);
 void print_sequence(int* sequence, int sequence_size, int first_n, int last_n);
 void bitonic_sort_seq(int start, int length, int *seq, int flag);
@@ -32,14 +33,8 @@ int main(int argc, char *argv[])  // Arg1: Número de threads; Arg2: Tamanho da 
     int numThreads;
     double startTime, finishTime, elapsedTime;
 
-    srand(time(NULL));
-
     n = atoi(argv[2]);
-    seq = (int *) malloc (n * sizeof(int));
-    for (i = n; i >= 0; i--)
-    {
-        seq[i] = i;
-    }
+    seq = generate_random_array(n, n);
 
     // start
     startTime = omp_get_wtime();
@@ -52,8 +47,13 @@ int main(int argc, char *argv[])  // Arg1: Número de threads; Arg2: Tamanho da 
     // making sure input is okay
     if ( n < numThreads * 2 )
     {
-        printf("The size of the sequence is less than 2 * the number of processes.\n");
-        exit(0);
+        printf("Erro: O tamanho do vetor é menor que 2 * o número de processos. Abortando...\n");
+        exit(1);
+    }
+    if (!is_power_of_two(n))
+    {
+        printf("Erro: o tamanho do vetor não é uma potência de 2. Abortando...\n");
+        exit(1);
     }
 
     // the size of sub part
@@ -104,11 +104,7 @@ int main(int argc, char *argv[])  // Arg1: Número de threads; Arg2: Tamanho da 
     elapsedTime = finishTime - startTime;
 
     
-    // print a sequence
-    for (i = 0; i < n; i++){
-      printf("%d ", seq[i]);
-    }
-    printf("\n");
+    print_sequence(seq, n, 10, 10);
     
     printf("Start Time: %f sec\n", startTime);
     printf("Finish Time: %f sec\n", finishTime);
@@ -117,6 +113,13 @@ int main(int argc, char *argv[])  // Arg1: Número de threads; Arg2: Tamanho da 
     free(seq);
 
     return 0;
+}
+
+
+int is_power_of_two(int num)
+{
+    // Verifica se o número é positivo e se tem apenas um bit definido
+    return (num > 0) && ((num & (num - 1)) == 0);
 }
 
 
