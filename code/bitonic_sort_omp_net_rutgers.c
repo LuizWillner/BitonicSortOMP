@@ -13,7 +13,7 @@
 #define DOWN 1
 
 
-int* generate_random_vector(int size);
+int* generate_random_array(int size, int mod_factor);
 void print_sequence(int* sequence, int sequence_size, int first_n, int last_n);
 void bitonic_sort_seq(int start, int length, int *seq, int flag);
 void bitonic_sort_par(int start, int length, int *seq, int flag);
@@ -120,7 +120,7 @@ int main(int argc, char *argv[])  // Arg1: Número de threads; Arg2: Tamanho da 
 }
 
 
-int* generate_random_array(int size) 
+int* generate_random_array(int size, int mod_factor) 
 {
     int *array = (int *) malloc(size * sizeof(int));
 
@@ -129,7 +129,7 @@ int* generate_random_array(int size)
 
     // Generate n random integers and store them in the vector
     for (int i = 0; i < size; i++) {
-        array[i] = rand();
+        array[i] = rand() % mod_factor;
     }
 
     return array;
