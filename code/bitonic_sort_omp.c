@@ -6,8 +6,6 @@
 #include <limits.h>
 
 
-#define MAX(A, B) (((A) > (B)) ? (A) : (B))
-#define MIN(A, B) (((A) > (B)) ? (B) : (A))
 #define UP 0
 #define DOWN 1
 
@@ -46,13 +44,6 @@ int main(int argc, char *argv[])  // Arg1: Número de threads; Arg2: Tamanho da 
     printf("Número de threads: %d\n", numThreads);
     printf("Vetor inicial:\t");
     print_sequence(seq, size, 10, 10);
-
-    // making sure input is okay
-    if ( size_ext < numThreads * 2 )
-    {
-        printf("Erro: O tamanho do vetor é menor que 2 * o número de processos. Abortando...\n");
-        exit(1);
-    }
 
     // the size of sub part
     m = size_ext / numThreads;

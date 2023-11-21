@@ -86,6 +86,9 @@ int main(int argc, char* argv[]) {
     }
 
     MPI_Barrier(comm);
+    MPI_Barrier(comm);
+    MPI_Barrier(comm);
+    MPI_Barrier(comm);
 
     if (my_rank == 0) {
         printf("Processes: %d\n", num_processes);

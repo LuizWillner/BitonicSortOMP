@@ -188,5 +188,3 @@ f) 1500000 (aprox. para 2**21 = 2097152)
 	Começo: 17039.475633 seg
 	Fim: 17039.963231 seg
 	Tempo decorrido: 0.487598 seg
-
-
