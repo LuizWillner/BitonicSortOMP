@@ -13,6 +13,8 @@
 #define DOWN 1
 
 
+int* generate_random_vector(int size);
+void print_sequence(int* sequence, int sequence_size, int first_n, int last_n);
 void bitonic_sort_seq(int start, int length, int *seq, int flag);
 void bitonic_sort_par(int start, int length, int *seq, int flag);
 void swap(int *a, int *b);
@@ -21,18 +23,16 @@ void swap(int *a, int *b);
 int m;
 
 
-int main(int argc, char *argv[])
+int main(int argc, char *argv[])  // Arg1: Número de threads; Arg2: Tamanho da sequência
 {
-    // Arg1: Número de threads; Arg2: Tamanho da sequência
     int i, j;
     int n;
     int flag;
     int *seq;
+    int numThreads;
+    double startTime, finishTime, elapsedTime;
 
-    double startTime, finishTime, elapsedTime; /* for checking/testing timing */
-    double clockZero = 0.0;
-
-    int numThreads, id;
+    srand(time(NULL));
 
     n = atoi(argv[2]);
     seq = (int *) malloc (n * sizeof(int));
@@ -117,6 +117,41 @@ int main(int argc, char *argv[])
     free(seq);
 
     return 0;
+}
+
+
+int* generate_random_array(int size) 
+{
+    int *array = (int *) malloc(size * sizeof(int));
+
+    // Seed the random number generator with the current time
+    srand(time(NULL));
+
+    // Generate n random integers and store them in the vector
+    for (int i = 0; i < size; i++) {
+        array[i] = rand();
+    }
+
+    return array;
+}
+
+
+void print_sequence(int* sequence, int sequence_size, int first_n, int last_n)
+{
+    printf("[");
+
+    for (int i = 0; i < first_n; i++)
+    {
+        printf("%d, ", sequence[i]);
+    }
+
+    printf("... , ");
+
+    for (int i = sequence_size - last_n; i < sequence_size - 1; i++)
+    {
+        printf("%d, ", sequence[i]);
+    }
+    printf("%d]\n", sequence[sequence_size-1]);
 }
 
 
