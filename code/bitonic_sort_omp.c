@@ -14,92 +14,84 @@ int is_power_of_two(int num);
 int get_size_extended(int size);
 int* generate_random_array(int size, int mod_factor);
 void print_sequence(int* sequence, int sequence_size, int first_n, int last_n);
-void bitonic_sort_seq(int start, int length, int *seq, int flag);
-void bitonic_sort_par(int start, int length, int *seq, int flag);
+void bitonic_sort_seq(int start, int length, int *list, int flag);
+void bitonic_sort_par(int start, int length, int *list, int flag);
 void swap(int *a, int *b);
 
 
 int m;
 
 
-int main(int argc, char *argv[])  // Arg1: Número de threads; Arg2: Tamanho da sequência
+int main(int argc, char *argv[]) 
 {
     int i, j;
     int size, size_ext;
     int flag;
-    int *seq;
-    int numThreads;
-    double startTime, finishTime, elapsedTime;
+    int *list;
+    int n_threads;
+    double time_start, time_end, time_total;
 
     size = atoi(argv[2]);
-    seq = generate_random_array(size, size);
+    list = generate_random_array(size, size);
     size_ext = get_size_extended(size);
 
-    // start
-    startTime = omp_get_wtime();
 
-    numThreads = atoi(argv[1]);
-    omp_set_num_threads(numThreads);
+    time_start = omp_get_wtime();
 
-    printf("Número de threads: %d\n", numThreads);
+    n_threads = atoi(argv[1]);
+    omp_set_num_threads(n_threads);
+
+    printf("Número de threads: %d\n", n_threads);
     printf("Vetor inicial:\t");
-    print_sequence(seq, size, 10, 10);
+    print_sequence(list, size, 10, 10);
 
-    // the size of sub part
-    m = size_ext / numThreads;
+    m = size_ext / n_threads;
 
-    // make the sequence bitonic - part 1
     for (i = 2; i <= m; i = 2 * i)
     {
-#pragma omp parallel for shared(i, seq) private(j, flag)
+#pragma omp parallel for shared(i, list) private(j, flag)
         for (j = 0; j < size_ext; j += i)
         {
             if ((j / i) % 2 == 0)
                 flag = UP;
             else
                 flag = DOWN;
-            bitonic_sort_seq(j, i, seq, flag);
+            bitonic_sort_seq(j, i, list, flag);
         }
     }
 
-    // make the sequence bitonic - part 2
-    for (i = 2; i <= numThreads; i = 2 * i)
+    for (i = 2; i <= n_threads; i = 2 * i)
     {
-        for (j = 0; j < numThreads; j += i)
+        for (j = 0; j < n_threads; j += i)
         {
             if ((j / i) % 2 == 0)
                 flag = UP;
             else
                 flag = DOWN;
-            bitonic_sort_par(j*m, i*m, seq, flag);
+            bitonic_sort_par(j*m, i*m, list, flag);
         }
 #pragma omp parallel for shared(j)
-        for (j = 0; j < numThreads; j++)
+        for (j = 0; j < n_threads; j++)
         {
             if (j < i)
                 flag = UP;
             else
                 flag = DOWN;
-            bitonic_sort_seq(j*m, m, seq, flag);
+            bitonic_sort_seq(j*m, m, list, flag);
         }
     }
 
-    // bitonic sort
-    //bitonic_sort_par(0, size_ext, seq, UP);
-    //bitonic_sort_seq(0, size_ext, seq, UP);
-
-    //end
-    finishTime = omp_get_wtime();
-    elapsedTime = finishTime - startTime;
+    time_end = omp_get_wtime();
+    time_total = time_end - time_start;
 
     printf("Vetor final:\t");
-    print_sequence(seq, size, 10, 10);
+    print_sequence(list, size, 10, 10);
     printf("\n");
-    printf("Começo: %f seg\n", startTime);
-    printf("Fim: %f seg\n", finishTime);
-    printf("Tempo decorrido: %f seg\n", elapsedTime);
+    printf("Começo: %f seg\n", time_start);
+    printf("Fim: %f seg\n", time_end);
+    printf("Tempo decorrido: %f seg\n", time_total);
 
-    free(seq);
+    free(list);
 
     return 0;
 }
@@ -107,7 +99,6 @@ int main(int argc, char *argv[])  // Arg1: Número de threads; Arg2: Tamanho da 
 
 int is_power_of_two(int num)
 {
-    // Verifica se o número é positivo e se tem apenas um bit definido
     return (num > 0) && ((num & (num - 1)) == 0);
 }
 
@@ -116,14 +107,10 @@ int get_size_extended(int size)
 {
     int size_extended;
     if (is_power_of_two(size)){
-        // printf("%d é potência de 2.\n", size);
         size_extended = size;
     } else {
-        // printf("%d NÃO é potência de 2.\n", size);
         double exponent = floor(log2(size)) + 1.0;
         size_extended = (int) pow(2, exponent);
-        // printf("log2(%d) = %f\n", size, log2(size));
-        // printf("Próxima potência de 2 é %d (2^%f)\n", size_extended, exponent);
     }
     return size_extended;
 }
@@ -187,7 +174,7 @@ void print_sequence(int* sequence, int sequence_size, int first_n, int last_n)
 }
 
 
-void bitonic_sort_seq(int start, int length, int *seq, int flag)
+void bitonic_sort_seq(int start, int length, int *list, int flag)
 {
     int i;
     int split_length;
@@ -203,27 +190,26 @@ void bitonic_sort_seq(int start, int length, int *seq, int flag)
 
     split_length = length / 2;
 
-    // bitonic split
     for (i = start; i < start + split_length; i++)
     {
         if (flag == UP)
         {
-            if (seq[i] > seq[i + split_length])
-                swap(&seq[i], &seq[i + split_length]);
+            if (list[i] > list[i + split_length])
+                swap(&list[i], &list[i + split_length]);
         }
         else
         {
-            if (seq[i] < seq[i + split_length])
-                swap(&seq[i], &seq[i + split_length]);
+            if (list[i] < list[i + split_length])
+                swap(&list[i], &list[i + split_length]);
         }
     }
 
-    bitonic_sort_seq(start, split_length, seq, flag);
-    bitonic_sort_seq(start + split_length, split_length, seq, flag);
+    bitonic_sort_seq(start, split_length, list, flag);
+    bitonic_sort_seq(start + split_length, split_length, list, flag);
 }
 
 
-void bitonic_sort_par(int start, int length, int *seq, int flag)
+void bitonic_sort_par(int start, int length, int *list, int flag)
 {
     int i;
     int split_length;
@@ -240,27 +226,26 @@ void bitonic_sort_par(int start, int length, int *seq, int flag)
     split_length = length / 2;
 
 
-// bitonic split
-#pragma omp parallel for shared(seq, flag, start, split_length) private(i)
+#pragma omp parallel for shared(list, flag, start, split_length) private(i)
     for (i = start; i < start + split_length; i++)
     {
         if (flag == UP)
         {
-            if (seq[i] > seq[i + split_length])
-                swap(&seq[i], &seq[i + split_length]);
+            if (list[i] > list[i + split_length])
+                swap(&list[i], &list[i + split_length]);
         }
         else
         {
-            if (seq[i] < seq[i + split_length])
-                swap(&seq[i], &seq[i + split_length]);
+            if (list[i] < list[i + split_length])
+                swap(&list[i], &list[i + split_length]);
         }
     }
 
     if (split_length > m)
     {
-        // m is the size of sub part-> n/numThreads
-        bitonic_sort_par(start, split_length, seq, flag);
-        bitonic_sort_par(start + split_length, split_length, seq, flag);
+        // m is the size of sub part-> n/n_threads
+        bitonic_sort_par(start, split_length, list, flag);
+        bitonic_sort_par(start + split_length, split_length, list, flag);
     }
 
     return;
