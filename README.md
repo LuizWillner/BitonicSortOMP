@@ -1,4 +1,4 @@
-# lab-paralela-bitonic-sort-omp
+# BitonicSortOMP
 Trabalho da disciplina de Laboratório de Programação Paralela | Universidade Federal Fluminense | 2023.2 | Bitonic Sort com OpenMP | 2023.2
 
 ## Descrição
